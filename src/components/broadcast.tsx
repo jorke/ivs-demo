@@ -3,8 +3,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AmazonIVSBroadcastClient } from 'amazon-ivs-web-broadcast';
 
-const INGEST_ENDPOINT  = 'XXXX'
-
 async function handlePermissions() {
   let permissions = {
       audio: false,
@@ -30,15 +28,16 @@ async function handlePermissions() {
   
 }
 
+type Props = {
+  ingestEndpoint: string
+  streamKey: string
+}
 
-export default function Broadcaster({}) {
+export default function Broadcaster({ingestEndpoint, streamKey}: Props) {
   const clientRef = useRef<AmazonIVSBroadcastClient>(undefined);
   const videoPreviewRef = useRef<HTMLCanvasElement | null>(null)
   const [isPublishing, setIsPublishing] = useState(false)
-  const [streamKey, setStreamKey] = useState<string>('sk_us-east-1_5CVRzR17EVev_Xh2Ar6wRFztXMB2cQiAFdbBjLQ43Fo')
-  
-  // const [ingestionEndpoint, setIngestionEndpoint] = useState<string>('')
-  
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [deviceState, setDeviceState] = useState<{
       loading: boolean;
@@ -61,13 +60,13 @@ export default function Broadcaster({}) {
     const client = IVSBroadcastClient.create({
       // Enter the desired stream configuration
       streamConfig,
-      ingestEndpoint: INGEST_ENDPOINT,
+      ingestEndpoint,
       logLevel: 1
     });
 
     console.log(client.getSessionId())
 
-    const handleActiveStateChange = active => {
+    const handleActiveStateChange = (active: unknown) => {
       if (active) 
         console.log(clientRef.current?.getSessionId())
     } 
@@ -142,20 +141,6 @@ export default function Broadcaster({}) {
         <canvas ref={videoPreviewRef}></canvas>
       </div>
       <div className="flex gap-2">
-        {/* <input
-          type="text"
-          value={ingestionEndpoint}
-          onChange={(e) => setIngestionEndpoint(e.target.value)}
-          placeholder="Ingestion Endpoint"
-          className="px-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-black"        /> */}
-        <input
-          type="text"
-          value={streamKey}
-          onChange={(e) => setStreamKey(e.target.value)}
-          placeholder="Enter stream key"
-          className="px-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-black"
-        />
-        
         <button onClick={isPublishing ? onStop : onStart} 
           disabled={!streamKey}
           className={`px-6 py-2 rounded-lg font-medium  text-white disabled:bg-gray-400 disabled:cursor-not-allowed ${
